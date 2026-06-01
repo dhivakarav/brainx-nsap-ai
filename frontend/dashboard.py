@@ -307,7 +307,7 @@ st.markdown(f"""
       <div style="margin-top:6px;"><span class="status-pill">● System Online</span></div>
     </div>
   </div>
-  <div class="gov-nav-bar">
+  <div class="gov-nav-bar" id="gov-nav">
     <a href="#" onclick="nsapNav('Overview'); return false;">🏠 Home</a>
     <a href="#" onclick="nsapNav('Overview'); return false;">📋 Overview</a>
     <a href="#" onclick="nsapNav('High-Risk'); return false;">🚨 High Risk</a>
@@ -316,14 +316,19 @@ st.markdown(f"""
     <a href="#" onclick="nsapNav('About'); return false;">ℹ️ Help</a>
   </div>
 </div>
+""", unsafe_allow_html=True)
+
+# Inject nav JS separately (not in f-string to avoid {} conflicts)
+st.markdown("""
 <script>
 function nsapNav(keyword) {
-    var labels = window.parent.document.querySelectorAll('[data-testid="stSidebar"] label');
-    if (!labels.length) {
+    var doc = window.parent.document;
+    var labels = doc.querySelectorAll('[data-testid="stSidebar"] label');
+    if (!labels || labels.length === 0) {
         labels = document.querySelectorAll('[data-testid="stSidebar"] label');
     }
     for (var i = 0; i < labels.length; i++) {
-        if (labels[i].innerText.indexOf(keyword) >= 0) {
+        if (labels[i].innerText.indexOf(keyword) !== -1) {
             labels[i].click();
             return;
         }

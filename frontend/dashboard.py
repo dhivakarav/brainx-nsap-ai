@@ -308,14 +308,28 @@ st.markdown(f"""
     </div>
   </div>
   <div class="gov-nav-bar">
-    <a href="#">🏠 Home</a>
-    <a href="#">📋 Overview</a>
-    <a href="#">🚨 High Risk</a>
-    <a href="#">🔍 Search</a>
-    <a href="#">📊 Reports</a>
-    <a href="#">ℹ️ Help</a>
+    <a href="#" onclick="nsapNav('Overview'); return false;">🏠 Home</a>
+    <a href="#" onclick="nsapNav('Overview'); return false;">📋 Overview</a>
+    <a href="#" onclick="nsapNav('High-Risk'); return false;">🚨 High Risk</a>
+    <a href="#" onclick="nsapNav('Search'); return false;">🔍 Search</a>
+    <a href="#" onclick="nsapNav('Analytics'); return false;">📊 Reports</a>
+    <a href="#" onclick="nsapNav('About'); return false;">ℹ️ Help</a>
   </div>
 </div>
+<script>
+function nsapNav(keyword) {
+    var labels = window.parent.document.querySelectorAll('[data-testid="stSidebar"] label');
+    if (!labels.length) {
+        labels = document.querySelectorAll('[data-testid="stSidebar"] label');
+    }
+    for (var i = 0; i < labels.length; i++) {
+        if (labels[i].innerText.indexOf(keyword) >= 0) {
+            labels[i].click();
+            return;
+        }
+    }
+}
+</script>
 """, unsafe_allow_html=True)
 
 # ── LOAD DATA ────────────────────────────────────────────────────────────────────

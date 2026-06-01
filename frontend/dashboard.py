@@ -309,33 +309,15 @@ st.markdown(f"""
     </div>
   </div>
   <div class="gov-nav-bar" id="gov-nav">
-    <a href="#" onclick="window.nsapNav('Overview'); return false;">🏠 Home</a>
-    <a href="#" onclick="window.nsapNav('Overview'); return false;">📋 Overview</a>
-    <a href="#" onclick="window.nsapNav('High-Risk'); return false;">🚨 High Risk</a>
-    <a href="#" onclick="window.nsapNav('Search'); return false;">🔍 Search</a>
-    <a href="#" onclick="window.nsapNav('Analytics'); return false;">📊 Reports</a>
-    <a href="#" onclick="window.nsapNav('About'); return false;">ℹ️ Help</a>
+    <a href="?nav=overview">🏠 Home</a>
+    <a href="?nav=overview">📋 Overview</a>
+    <a href="?nav=highrisk">🚨 High Risk</a>
+    <a href="?nav=search">🔍 Search</a>
+    <a href="?nav=analytics">📊 Reports</a>
+    <a href="?nav=about">ℹ️ Help</a>
   </div>
 </div>
 """, unsafe_allow_html=True)
-
-# Inject nav JS via components.html so it actually executes
-components.html("""
-<script>
-function nsapNav(keyword) {
-    var doc = window.parent.document;
-    var labels = doc.querySelectorAll('[data-testid="stSidebar"] label');
-    for (var i = 0; i < labels.length; i++) {
-        if (labels[i].innerText.indexOf(keyword) !== -1) {
-            labels[i].click();
-            return;
-        }
-    }
-}
-// Expose to parent so onclick in header can call it
-window.parent.nsapNav = nsapNav;
-</script>
-""", height=0)
 
 # ── LOAD DATA ────────────────────────────────────────────────────────────────────
 @st.cache_data
@@ -372,6 +354,28 @@ risk_merged = risk_scores.merge(
     on='beneficiary_id', how='left'
 )
 
+# ── QUERY PARAM → PAGE MAPPING ───────────────────────────────────────────────────
+PAGES = [
+    "🏠  Overview",
+    "🤖  Model Performance",
+    "🔍  Beneficiary Search",
+    "🚨  High-Risk Registry",
+    "📊  Analytics",
+    "ℹ️  About"
+]
+NAV_MAP = {
+    "overview":  "🏠  Overview",
+    "models":    "🤖  Model Performance",
+    "search":    "🔍  Beneficiary Search",
+    "highrisk":  "🚨  High-Risk Registry",
+    "analytics": "📊  Analytics",
+    "about":     "ℹ️  About",
+}
+# Pick default page from URL query param if present
+_nav_param   = st.query_params.get("nav", "").lower()
+_default_page = NAV_MAP.get(_nav_param, "🏠  Overview")
+_default_idx  = PAGES.index(_default_page)
+
 # ── SIDEBAR ──────────────────────────────────────────────────────────────────────
 with st.sidebar:
     st.markdown("""
@@ -381,14 +385,7 @@ with st.sidebar:
     </div>
     """, unsafe_allow_html=True)
 
-    page = st.radio("**Navigation**", [
-        "🏠  Overview",
-        "🤖  Model Performance",
-        "🔍  Beneficiary Search",
-        "🚨  High-Risk Registry",
-        "📊  Analytics",
-        "ℹ️  About"
-    ])
+    page = st.radio("**Navigation**", PAGES, index=_default_idx)
 
     st.markdown(f"""
     <div class="sidebar-stats">

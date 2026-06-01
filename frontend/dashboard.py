@@ -4,6 +4,7 @@ Deceased Beneficiary Fraud Detection Portal
 """
 
 import streamlit as st
+import streamlit.components.v1 as components
 import pandas as pd
 import numpy as np
 import plotly.express as px
@@ -308,25 +309,22 @@ st.markdown(f"""
     </div>
   </div>
   <div class="gov-nav-bar" id="gov-nav">
-    <a href="#" onclick="nsapNav('Overview'); return false;">🏠 Home</a>
-    <a href="#" onclick="nsapNav('Overview'); return false;">📋 Overview</a>
-    <a href="#" onclick="nsapNav('High-Risk'); return false;">🚨 High Risk</a>
-    <a href="#" onclick="nsapNav('Search'); return false;">🔍 Search</a>
-    <a href="#" onclick="nsapNav('Analytics'); return false;">📊 Reports</a>
-    <a href="#" onclick="nsapNav('About'); return false;">ℹ️ Help</a>
+    <a href="#" onclick="window.nsapNav('Overview'); return false;">🏠 Home</a>
+    <a href="#" onclick="window.nsapNav('Overview'); return false;">📋 Overview</a>
+    <a href="#" onclick="window.nsapNav('High-Risk'); return false;">🚨 High Risk</a>
+    <a href="#" onclick="window.nsapNav('Search'); return false;">🔍 Search</a>
+    <a href="#" onclick="window.nsapNav('Analytics'); return false;">📊 Reports</a>
+    <a href="#" onclick="window.nsapNav('About'); return false;">ℹ️ Help</a>
   </div>
 </div>
 """, unsafe_allow_html=True)
 
-# Inject nav JS separately (not in f-string to avoid {} conflicts)
-st.markdown("""
+# Inject nav JS via components.html so it actually executes
+components.html("""
 <script>
 function nsapNav(keyword) {
     var doc = window.parent.document;
     var labels = doc.querySelectorAll('[data-testid="stSidebar"] label');
-    if (!labels || labels.length === 0) {
-        labels = document.querySelectorAll('[data-testid="stSidebar"] label');
-    }
     for (var i = 0; i < labels.length; i++) {
         if (labels[i].innerText.indexOf(keyword) !== -1) {
             labels[i].click();
@@ -334,8 +332,10 @@ function nsapNav(keyword) {
         }
     }
 }
+// Expose to parent so onclick in header can call it
+window.parent.nsapNav = nsapNav;
 </script>
-""", unsafe_allow_html=True)
+""", height=0)
 
 # ── LOAD DATA ────────────────────────────────────────────────────────────────────
 @st.cache_data

@@ -348,8 +348,8 @@ critical_cnt = int((risk_scores['risk_level'] == 'CRITICAL').sum())
 high_cnt     = int((risk_scores['risk_level'] == 'HIGH').sum())
 
 risk_merged = risk_scores.merge(
-    beneficiaries[['beneficiary_id','name','age','state','scheme_type',
-                   'monthly_amount','aadhaar_verified','bank_verified','is_fraud']],
+    beneficiaries[['beneficiary_id','name','state','scheme_type',
+                   'monthly_amount','bank_verified','is_fraud']],
     on='beneficiary_id', how='left'
 )
 
@@ -387,13 +387,15 @@ with st.sidebar:
 
 # helper: render one KPI card
 def kpi(label, value, sub="", color=""):
-    cls = f"kpi-card {color}".strip()
-    return f"""
-    <div class="{cls}">
-      <div class="kpi-label">{label}</div>
-      <div class="kpi-value">{value}</div>
-      {'<div class="kpi-sub">'+sub+'</div>' if sub else ''}
-    </div>"""
+    cls = ("kpi-card " + color).strip()
+    sub_html = '<div class="kpi-sub">' + (sub if sub else "&nbsp;") + '</div>'
+    return (
+        '<div class="' + cls + '">'
+        '<div class="kpi-label">' + label + '</div>'
+        '<div class="kpi-value">' + value + '</div>'
+        + sub_html +
+        '</div>'
+    )
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # OVERVIEW
@@ -740,9 +742,11 @@ elif "High-Risk" in page:
         + kpi("Avg Fraud Prob.",     f"{high['fraud_probability'].mean():.1%}", "", "red")
         + '</div>', unsafe_allow_html=True)
 
+    display_cols = [c for c in ['beneficiary_id','name','age','state','scheme_type',
+                   'monthly_amount','fraud_probability','risk_level',
+                   'death_record_match','aadhaar_verified','risk_factors'] if c in high.columns]
     st.dataframe(
-        high[['beneficiary_id','name','age','state','scheme_type','monthly_amount',
-              'fraud_probability','risk_level','death_record_match','aadhaar_verified','risk_factors']].rename(columns={
+        high[display_cols].rename(columns={
             'beneficiary_id':'ID','name':'Name','age':'Age','state':'State',
             'scheme_type':'Scheme','monthly_amount':'Monthly (₹)',
             'fraud_probability':'Fraud Prob.','risk_level':'Risk Level',

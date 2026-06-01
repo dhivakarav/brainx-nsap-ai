@@ -1,0 +1,8 @@
+__pycache__/
+*.py[cod]
+.env
+.DS_Store
+data/transactions.csv
+data/life_certificates.csv
+data/beneficiaries.csv
+data/death_records.csv
